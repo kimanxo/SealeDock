@@ -8,7 +8,7 @@
 <div id="upload_overlay" class="fixed inset-0 bg-transparent flex items-center justify-center z-50 ">
   <div class="relative bg-white rounded-lg shadow-lg w-full max-w-md p-6">
     <!-- Close Button -->
-    <button id="closeFileModal" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800 cursor-pointer text-3xl font-bold">
+    <button id="closeFileModal" onclick="closeModal()" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800 cursor-pointer text-3xl font-bold">
       &times;
     </button>
 
@@ -63,5 +63,13 @@
     padding: 2px 4px;        
 }
 </style>
+
+
+<script>
+function closeModal() {
+  const modal = document.getElementById('upload_overlay');
+  modal.removeChild(modal.firstChild);
+}
+</script>
 
 {% endblock "body" %}
