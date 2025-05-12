@@ -10,7 +10,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import MediaUploadForm
-from .models import Media, Group, Member
+from .models import Media, Group, Member, PreviewLink, OneTimeKey
 from django.views.generic import ListView
 from django.utils import timezone
 from django.core.validators import validate_email
@@ -22,7 +22,10 @@ from django.core.files.base import ContentFile
 from django.db.models import Q
 from django.core.files.storage import default_storage
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, JsonResponse
+import secrets
+from datetime import timedelta
+
 
 
 
@@ -192,26 +195,35 @@ class MediaListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return Media.objects.filter(owner=self.request.user)
 
-
 class MediaView(LoginRequiredMixin, View):
 
     def post(self, request):
-        media = Media.objects.get(pk=request.POST.get("pk"))
-        if not media:
+        try:
+            media = Media.objects.get(pk=request.POST.get("pk"))
+        except Media.DoesNotExist:
             response = HttpResponse("Media not found", status=404)
-            response["HX-Retarget"] = "#errors"
+            response["HX-Retarget"] = "#error"
             response["HX-Reswap"] = "innerHTML"
             return response
+
         if media.owner != request.user:
-            response =  HttpResponse("You do not have permission to delete this media", status=403)
-            response["HX-Retarget"] = "#errors"
+            response = HttpResponse("You do not have permission to delete this media", status=403)
+            response["HX-Retarget"] = "#error"
             response["HX-Reswap"] = "innerHTML"
             return response
-        media.delete()        
-        response =  render(
+
+        # Delete file from storage
+        if media.file and os.path.isfile(media.file.path):
+            os.remove(media.file.path)
+
+        # Delete media object
+        media.delete()
+
+        # Re-render updated media list
+        response = render(
             request,
             "partials/files_rows.html",
-            {"media_list": Media.objects.filter(owner=self.request.user)},
+            {"media_list": Media.objects.filter(owner=request.user)},
         )
         response["HX-Retarget"] = ".tbody"
         response["HX-Reswap"] = "outerHTML"
@@ -508,3 +520,72 @@ def download_media(request, pk):
                 os.remove(decrypted_temp_path)
             except Exception as e:
                 print(f"Failed to clean up temp file {decrypted_temp_path}: {str(e)}")
+                
+                
+                
+
+
+
+
+@login_required
+def generate_preview_link(request, pk):
+    media = get_object_or_404(Media, pk=pk, owner=request.user)
+
+    # Generate unique token + key
+    token = secrets.token_urlsafe(24)
+    key = secrets.token_urlsafe(32)
+
+    # Create the PreviewLink and OneTimeKey
+    preview_link = PreviewLink.objects.create(
+        media=media,
+        token=token,
+        expires_at=timezone.now() + timedelta(hours=6)
+    )
+    OneTimeKey.objects.create(media=media, key=key)
+
+    share_url = f"{request.build_absolute_uri('/')[:-1]}/media/preview_file/{token}?key={key}"
+    return JsonResponse({"share_url": share_url})
+
+
+
+
+def preview_file(request, token):
+    key_param = request.GET.get("key")
+    preview = get_object_or_404(PreviewLink, token=token)
+    
+    
+    
+    if not preview.is_valid():
+        return HttpResponse("Link expired or disabled", status=403)
+
+    # Validate one-time key
+    try:
+        one_time_key = OneTimeKey.objects.get(media=preview.media, key=key_param, used=False)
+    except OneTimeKey.DoesNotExist:
+        return HttpResponse("Invalid or already used key", status=403)
+
+    # Mark key as used
+    
+
+    # Decrypt and return file
+    media = preview.media
+    encrypted_file_path = media.file.path
+    original_filename = os.path.basename(media.file.name).replace(".sealed", "")
+    decrypted_temp_path = f"/tmp/decrypted_{uuid.uuid4()}_{original_filename}"
+
+    try:
+        decryptor = Encryptor(key=media.key, master_key=settings.ENCRYPTION_MASTER_KEY)
+        decrypted_data = decryptor.decrypt_file(encrypted_file_path, decrypted_temp_path)
+
+        content_type = mimetypes.guess_type(original_filename)[0] or "application/octet-stream"
+        response = HttpResponse(decrypted_data, content_type=content_type)
+        response["Content-Disposition"] = f'attachment; filename="{original_filename}"'
+        one_time_key.used = True
+        one_time_key.save()
+        return response
+    except Exception as e:
+        print(e)
+        return HttpResponse("Decryption failed", status=500)
+    finally:
+        if os.path.exists(decrypted_temp_path):
+            os.remove(decrypted_temp_path)

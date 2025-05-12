@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import index, RegisterView, LoginView, DashboardView, Logout, SettingsView, upload_media, download_media, MediaListView, MediaView, GroupListView, GroupView, update_username, update_email, change_password
+from .views import index, RegisterView, LoginView, DashboardView, Logout, SettingsView, upload_media, download_media, MediaListView, MediaView, GroupListView, GroupView, update_username, update_email, change_password, generate_preview_link, preview_file
 from django.contrib.auth import views as auth_views
 
 
@@ -40,6 +40,16 @@ urlpatterns = [
         "media/download/<int:pk>/",  # pk: Primary key of the media file
         download_media,
         name="download_media",
+    ),
+    path(
+        "media/generate_preview/<int:pk>/",  # pk: Primary key of the media file
+        generate_preview_link,
+        name="generate_preview",
+    ),
+    path(
+        "media/preview_file/<str:token>/",  # pk: Primary key of the media file
+        preview_file,
+        name="preview_file",
     ),
     path("dashboard/files", MediaListView.as_view(), name="media_list"),
     path("dashboard/groups", GroupListView.as_view(), name="group_list"),
