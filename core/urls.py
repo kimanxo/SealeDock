@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import index, RegisterView, LoginView, DashboardView, Logout, SettingsView, upload_media, MediaListView, MediaView, GroupListView, GroupView, update_username, update_email, change_password
+from .views import index, RegisterView, LoginView, DashboardView, Logout, SettingsView, upload_media, download_media, MediaListView, MediaView, GroupListView, GroupView, update_username, update_email, change_password
 from django.contrib.auth import views as auth_views
 
 
@@ -36,6 +36,11 @@ urlpatterns = [
     path("logout", view=Logout, name="logout"),
     path("dashboard", view=DashboardView.as_view(), name="dashboard"),
     path("dashboard/upload", upload_media, name="upload_media"),
+    path(
+        "media/download/<int:pk>/",  # pk: Primary key of the media file
+        download_media,
+        name="download_media",
+    ),
     path("dashboard/files", MediaListView.as_view(), name="media_list"),
     path("dashboard/groups", GroupListView.as_view(), name="group_list"),
     path("dashboard/files/delete", view=MediaView.as_view(), name="media_delete"),

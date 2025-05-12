@@ -5,7 +5,6 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.core.validators import EmailValidator
 from django.contrib.auth.password_validation import validate_password
-from django.http import HttpResponse
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -14,31 +13,16 @@ from .forms import MediaUploadForm
 from .models import Media, Group, Member
 from django.views.generic import ListView
 from django.utils import timezone
-from django.contrib import messages
 from django.core.validators import validate_email
 from django.contrib.auth import update_session_auth_hash
 from .utils import Encryptor
 from django.conf import settings
 import os, uuid, mimetypes, ipaddress
 from django.core.files.base import ContentFile
-import os, uuid, mimetypes, ipaddress
 from django.db.models import Q
-from django.shortcuts import render
 from django.core.files.storage import default_storage
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse, Http404
-from django.conf import settings
-from cryptography.fernet import InvalidToken
-from django.utils import timezone
-from datetime import timezone
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.core.validators import validate_email
-from django.core.exceptions import ValidationError
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import update_session_auth_hash
-from django.contrib.auth.password_validation import validate_password
-from cryptography.hazmat.primitives import serialization
 
 
 
@@ -445,3 +429,82 @@ def upload_media(request):
     else:
         form = MediaUploadForm(user=request.user)
     return render(request, "partials/upload.html", {"form": form})
+
+
+
+
+
+
+
+
+@login_required
+def download_media(request, pk):
+    """
+    Handle secure media file download with decryption.
+
+    Process:
+    1. Verify user permissions
+    2. Decrypt file using stored key
+    3. Serve decrypted file
+
+    Args:
+        pk: Primary key of the Media object
+
+    Returns:
+        HttpResponse: File download or error message
+    """
+    media = get_object_or_404(Media, pk=pk)
+
+    # Permission check
+    if (
+        request.user != media.owner
+        and not media.groups.filter(members=request.user).exists()
+    ):
+        return HttpResponse("You don't have permission to access this file")
+
+    encrypted_file_path = media.file.path
+    if not os.path.exists(encrypted_file_path):
+        raise Http404("Encrypted file not found")
+
+    # Generate temporary path for decrypted output
+    original_filename = os.path.basename(media.file.name).replace(".sealed", "")
+    decrypted_temp_path = f"/tmp/decrypted_{uuid.uuid4()}_{original_filename}"
+
+    try:
+        # Initialize decryptor with the encrypted key from database and master key
+        decryptor = Encryptor(key=media.key, master_key=settings.ENCRYPTION_MASTER_KEY)
+
+        # Decrypt file to temporary location
+        decrypted_data = decryptor.decrypt_file(
+            encrypted_file_path, decrypted_temp_path
+        )
+
+        
+        # Determine content type
+        content_type = (
+            mimetypes.guess_type(original_filename)[0] or "application/octet-stream"
+        )
+
+        # Create response with decrypted content
+        response = HttpResponse(decrypted_data, content_type=content_type)
+        response["Content-Disposition"] = f'attachment; filename="{original_filename}"'
+
+        # Log admin activity if applicable
+        return response
+        
+
+    except InvalidToken as e:
+        print(f"Decryption failed for media {pk}: {str(e)}")
+        return HttpResponse("Failed to decrypt file - invalid key")
+
+    except Exception as e:
+        print(f"Error processing media {pk}: {str(e)}")
+        return HttpResponse("An error occurred while processing the file")
+
+    finally:
+        # Clean up temporary file
+        if os.path.exists(decrypted_temp_path):
+            try:
+                os.remove(decrypted_temp_path)
+            except Exception as e:
+                print(f"Failed to clean up temp file {decrypted_temp_path}: {str(e)}")
