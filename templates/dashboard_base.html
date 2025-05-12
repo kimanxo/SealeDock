@@ -1,0 +1,22 @@
+{% load static %}
+{% load django_htmx %}
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="//unpkg.com/alpinejs" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="{% static 'js/htmx.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'styles/dashboard.css' %}">
+    <script src="{% static 'js/dashboard.js' %}" defer></script>
+    <title>{% block title %}{% endblock  %}</title>
+  </head>
+<body hx-headers='{"x-csrftoken": "{{ csrf_token }}"}' >
+  
+  {% block "body" %}
+  
+  {% endblock  %}
+</body>
+
+  </html>

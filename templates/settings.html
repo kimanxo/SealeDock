@@ -1,0 +1,99 @@
+{% extends 'dashboard_base.html' %} {% block title %} Dashboard | Settings
+{%endblock title %} {% load static %} {% block "body" %}
+
+<main>
+  {% include 'partials/dash_nav.html' %}
+  <h1 class="text-center text-xl md:text-2xl lg:text-3xl font-semibold my-14">
+    Hello {{ user|truncatechars:10 }}, Have control!
+  </h1>
+  <section class="my-12 m-auto overflow-hidden w-full  p-6 md:max-w-2xl lg:max-w-3xl rounded-md shadow-md">
+   <div class="flex flex-col gap-4 my-8">
+    <h1 class="text-xl font-semibold">Username & Email</h1>
+
+    <div class="flex gap-4 items-center">
+        <label class="w-24" for="id_username">Username:</label>
+        <div class="w-full">
+            <input
+                class="border-[1px] border-gray-200 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 w-full"
+                type="text"
+                name="username"
+                id="id_username"
+                value="{{ request.user.username }}"
+                hx-post="{% url 'update_username' %}"
+                hx-trigger="change, keyup delay:1000ms"
+                hx-target="#username-feedback"
+                hx-swap="innerHTML"
+            />
+            <div id="username-feedback" class="py-1"></div>
+        </div>
+    </div>
+</div>
+
+      <!-- Email -->
+     <div class="flex gap-4 items-center">
+    <label class="w-24" for="id_email">Email:</label>
+    <div class="w-full">
+        <input
+            class="border-[1px] border-gray-200 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 w-full"
+            type="email"
+            name="email"
+            id="id_email"
+            value="{{ request.user.email }}"
+            hx-post="{% url 'update_email' %}"
+            hx-trigger="change, keyup delay:1000ms"
+            hx-target="#email_errors"
+            hx-swap="innerHTML"
+            required
+        />
+        <small id="email_errors" class="block py-1"></small>
+    </div>
+</div>
+
+    <form action="" class="flex flex-col gap-4 my-8">
+      <h1 class="text-xl font-semibold">Passwords</h1>
+      <!-- Password -->
+      <div class="flex gap-4 items-center">
+        <label class="w-44" for="id_current_password">Current password: </label>
+        <div class="">
+          <input
+            class="border-[1px] border-gray-200 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 w-full"
+            type="text"
+            name="current_password"
+            id="id_current_password"
+            required
+          />
+          <small id="current_password_errors"></small>
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="flex gap-4 items-center">
+        <label class="w-44" for="id_new_password">New password: </label>
+
+        <div class="">
+          <input
+            class="border-[1px] border-gray-200 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 w-full"
+            type="text"
+            name="new_password"
+            id="id_new_password"
+            required
+          />
+          <small id="new_password_errors"></small>
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        class="bg-[#084B5B] text-white font-semibold w-fit px-4 py-2 rounded-md place-self-start"
+      >
+        Change Password
+      </button>
+    </form>
+
+    
+
+    <!-- Submit -->
+  </section>
+</main>
+
+{% endblock "body" %}

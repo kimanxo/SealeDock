@@ -1,0 +1,35 @@
+{% extends "dashboard_base.html" %}
+{% load static %}
+
+{% block "body" %}
+{% include "partials/dash_nav.html" %}
+
+
+<div class="p-6">
+  <div class="flex w-full justify-between items-center my-4">
+
+    <h2 class="text-2xl font-semibold mb-4">Your Files</h2>
+    <button class="border-[#084B5B] border-2 text-[#084B5B] font-semibold px-4 py-2 rounded  cursor-pointer"  hx-get="{% url 'upload_media' %}" hx-swap="outer-HTML" hx-target="#upload_overlay" >upload+</button>
+  </div>
+
+    <div class="overflow-x-auto rounded-tl-md rounded-tr-md ">
+      <table class="min-w-full bg-white rounded-xl shadow">
+        <thead class="">
+          <tr class="  bg-[#084B5B] text-left text-sm font-semibold text-white">
+            <th class="px-6 py-4">File Name</th>
+            <th class="px-6 py-4 text-end">Actions</th>
+          </tr>
+        </thead>
+         {% include "partials/files_rows.html"%}
+      </table>
+    </div>
+
+    {% include 'partials/file_modal.html' %}
+
+</div>
+
+<div id="upload_overlay"></div>
+
+
+
+{% endblock "body" %}

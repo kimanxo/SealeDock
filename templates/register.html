@@ -1,0 +1,131 @@
+{% extends 'base.html' %} {% block "body" %} {% include "partials/navbar.html"%}
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div
+        class="column is-full-mobile is-half-tablet is-one-third-desktop"
+        style="max-width: 500px"
+      >
+        <h1 class="title has-text-centered has-text-primary">Register</h1>
+
+        <div id="login-errors">
+            {% if errors %}
+                {% include 'partials/login_errors.html' %}
+            {% endif %}
+        </div>
+
+        <form method="POST" action="{% url 'register' %}">
+          {% csrf_token %}
+
+          <!-- Full Name -->
+          <div class="field">
+            <label class="label has-text-primary" for="id_full_name"
+              >Full Name</label
+            >
+            <div class="control">
+              <input
+                class="input"
+                type="text"
+                name="full_name"
+                id="id_full_name"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Username -->
+          <div class="field">
+            <label class="label has-text-primary" for="id_username"
+              >Username</label
+            >
+            <div class="control">
+              <input
+                class="input"
+                type="text"
+                name="username"
+                id="id_username"
+                required
+                hx-post="{% url 'register' %}"
+                hx-trigger="keyup changed delay:500ms"
+                hx-target="#username_availability"
+                hx-include="[name='username']"
+                hx-swap="outerHTML"
+                hx-headers="{'hx-origin': 'username'}"
+              />
+              <small id="username_availability"></small>
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="field">
+            <label class="label has-text-primary" for="id_email">Email</label>
+            <div class="control">
+              <input
+                class="input"
+                type="email"
+                name="email"
+                id="id_email"
+                required
+                hx-post="{% url 'register' %}"
+                hx-trigger="keyup changed delay:500ms"
+                hx-target="#email_availability"
+                hx-include="[name='email']"
+                hx-swap="outerHTML"
+                hx-headers="{'hx-origin': 'email'}"
+              />
+              <small id="email_availability"></small>
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="field">
+            <label class="label has-text-primary" for="id_password"
+              >Password</label
+            >
+            <div class="control">
+              <input
+                class="input"
+                type="password"
+                name="password"
+                id="id_password"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Confirm Password -->
+          <div class="field">
+            <label class="label has-text-primary" for="id_confirm_password"
+              >Confirm Password</label
+            >
+            <div class="control">
+              <input
+                class="input"
+                type="password"
+                name="confirm_password"
+                id="id_confirm_password"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <div class="field mt-4">
+            <div class="control">
+              <button
+                type="submit"
+                class="button h-4 is-fullwidth has-bg-primary-custom has-text-white"
+              >
+                Sign Up
+              </button>
+            </div>
+          </div>
+          <p>Already have an account ? <a href="{% url 'login' %}" class="has-text-primary-custom"><strong>Login</strong></a></p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% include "partials/footer.html" %} {% endblock %}

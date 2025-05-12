@@ -1,0 +1,43 @@
+{% load static %}
+<nav class="navbar sticky-navbar" role="navigation" aria-label="main navigation">
+      <div class="navbar-brand">
+        <a class="navbar-item" href="/">
+          <img src="{% static 'img/logo.png' %}" alt="" height="84" />
+        </a>
+
+        <a
+          role="button"
+          class="navbar-burger"
+          aria-label="menu"
+          aria-expanded="false"
+          data-target="navbarBasicExample"
+        >
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+
+      <div id="navbarBasicExample" class="navbar-menu">
+        <div class="navbar-end">
+          <a class="navbar-item nav-item" href="/#"> Home </a>
+
+          <a class="navbar-item nav-item " href="/#features"> Features </a>
+          <a class="navbar-item nav-item" href="/#pricing"> Pricing </a>
+          <a class="navbar-item nav-item" href="/#contact"> Contact </a>
+          <a class="navbar-item nav-item" href="/privacypolict.html"> Privacy Policy </a>
+        </div>
+
+        <div class="navbar-end">
+          <div class="navbar-item">
+            <div class="buttons">
+              <a class="button register is-primary" href="{% url 'register' %}">
+                <strong class="has-text-white">Register</strong>
+              </a>
+              <a class="button is-light login" href="{% url 'login' %}"> Log in </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>

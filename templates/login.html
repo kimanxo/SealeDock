@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+
+
+{% block "body" %}
+{% include "partials/navbar.html" %}
+
+
+
+
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+
+<section class="section my-36">
+  <div class="container">
+    <div class="columns is-centered">
+      <div
+        class="column is-full-mobile is-half-tablet is-one-third-desktop"
+        style="max-width: 500px"
+      >
+        <h1 class="title has-text-centered has-text-primary">Login</h1>
+
+       
+
+        <form method="POST" action="{% url 'login' %}" hx-post="{% url 'login' %}"  >
+          {% csrf_token %}
+
+        <div class="login-errors">
+            {% if errors %}
+                {% include 'partials/login_errors.html' %}
+            {% endif %}
+        </div>
+          <!-- Username -->
+          <div class="field">
+            <label class="label has-text-primary" for="id_username"
+              >Username</label
+            >
+            <div class="control">
+              <input
+                class="input"
+                type="text"
+                name="username"
+                id="id_username"
+                required
+                
+              />
+            </div>
+          </div>
+
+          
+
+          <!-- Password -->
+          <div class="field">
+            <label class="label has-text-primary" for="id_password"
+              >Password</label
+            >
+            <div class="control">
+              <input
+                class="input"
+                type="password"
+                name="password"
+                id="id_password"
+                required
+              />
+            </div>
+            <a class="text-sm has-text-primary-custom py-2  " href="{% url 'password_reset' %}">forgot password ?</a>
+          </div>
+
+          
+
+          <!-- Submit -->
+          <div class="field mt-4">
+            <div class="control">
+              <button
+                type="submit"
+                class="button h-4 is-fullwidth has-bg-primary-custom has-text-white "
+              >
+                Login
+              </button>
+
+             
+
+            </div>
+          </div>
+          <p>do not have an account yet ? <a href="{% url 'register' %}" class="has-text-primary-custom"><strong>Register</strong></a></p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+{% include "partials/footer.html" %}
+{% endblock  %}
+
+
+

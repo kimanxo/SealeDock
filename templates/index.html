@@ -1,0 +1,372 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block "body" %}
+
+
+  
+    {% include "partials/navbar.html" %}
+    <main class="section my-12">
+      <div class="container">
+        <div class="columns is-vcentered is-multiline">
+          <!-- Image -->
+          <div class="column is-12-mobile is-6-tablet has-text-centered">
+            <img src="{% static 'img/Logo.png' %}" alt="Logo" class="image is-256x256 mx-auto" />
+          </div>
+
+          <!-- Text and Buttons -->
+          <div class="column is-12-mobile is-6-tablet has-text-centered">
+            <div class="content">
+              <h1 class="title is-size-2 mb-3">Sealed Documents Dock</h1>
+              <p class="subtitle is-size-6 mb-4">
+                Upload, encrypt, share. We handle the security — you keep the
+                control.
+              </p>
+              <div class="buttons is-centered mt-4">
+                <a class="button is-primary" href="{% url 'register' %}">
+                  <strong class="has-text-white">Register</strong>
+                </a>
+                <a class="button is-light" href="{% url 'login' %}">Log in</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <section class="section my-12" id="features">
+      <div class="container">
+        <h1 class="title is-2 has-text-centered py-6">Features Overview</h1>
+
+        <details class="box mb-3">
+          <summary class="is-clickable has-text-weight-semibold">
+            Full Ownership & Control
+          </summary>
+          <div class="content p-3">
+            <p>
+              Gain complete sovereignty over your data. As the sole owner, you
+              have the unrestricted ability to encrypt, decrypt, share, and
+              manage your files according to your needs.
+            </p>
+          </div>
+        </details>
+
+        <details class="box mb-3">
+          <summary class="is-clickable has-text-weight-semibold">
+            Flexible Encryption Options
+          </summary>
+          <div class="content p-3">
+            <p>
+              Choose from industry-standard encryption algorithms like AES and
+              RSA. Secure your files with a personal password or utilize an
+              auto-generated, robust key for maximum security. Files are stored
+              temporarily, automatically deleting after a configurable period
+              (1-6 hours, default 6 hours) for enhanced privacy.
+            </p>
+          </div>
+        </details>
+
+        <details class="box mb-3">
+          <summary class="is-clickable has-text-weight-semibold">
+            Secure Decryption & Key Storage
+          </summary>
+          <div class="content p-3">
+            <p>
+              Access and decrypt your files whenever you need them. Your unique
+              decryption keys are securely stored within your account, encrypted
+              at the database level, ensuring only the system (Django backend)
+              can access them for your operations, preventing unauthorized
+              access or leaks.
+            </p>
+          </div>
+        </details>
+
+        <details class="box mb-3">
+          <summary class="is-clickable has-text-weight-semibold">
+            Versatile Download Choices
+          </summary>
+          <div class="content p-3">
+            <p>
+              Download your decrypted files in their original format or choose
+              to package them as a password-protected ZIP archive for an extra
+              layer of security during transfer or storage.
+            </p>
+          </div>
+        </details>
+
+        <details class="box mb-3">
+          <summary class="is-clickable has-text-weight-semibold">
+            One-Time Sharing Keys
+          </summary>
+          <div class="content p-3">
+            <p>
+              Securely share files with others using temporary, single-use
+              decryption keys.
+            </p>
+          </div>
+        </details>
+
+        <details class="box mb-3">
+          <summary class="is-clickable has-text-weight-semibold">
+            Secure File Previews
+          </summary>
+          <div class="content p-3">
+            <p>
+              Generate time-limited preview links for others to view files
+              without downloading. You can monitor link status and manually
+              reactivate them from your dashboard.
+            </p>
+          </div>
+        </details>
+
+        <details class="box mb-3">
+          <summary class="is-clickable has-text-weight-semibold">
+            Robust Account Security
+          </summary>
+          <div class="content p-3">
+            <ul>
+              <li>
+                <strong>Multi-Factor Authentication (MFA):</strong> Enable MFA
+                for an additional layer of security on your account.
+              </li>
+              <li>
+                <strong>Activity Logs:</strong> Track access to your shared
+                files, including when and potentially by whom (based on key
+                usage).
+              </li>
+              <li>
+                <strong>Profile Management:</strong> Easily update your profile
+                picture, password, and other settings.
+              </li>
+              <li>
+                <strong>Key Security:</strong> Your decryption keys remain
+                hidden, even from you. They are securely stored and encrypted in
+                the database, accessible only by the application logic.
+              </li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="box mb-3">
+          <summary class="is-clickable has-text-weight-semibold">
+            Roles & Permissions
+          </summary>
+          <div class="content p-3">
+            <p>Manage collaboration with defined roles:</p>
+            <ul>
+              <li>
+                <strong>Owner:</strong> Has complete control over group files,
+                encryption, and member management, including assigning Admins.
+              </li>
+              <li>
+                <strong>Admin:</strong> Can encrypt files, manage preview links,
+                and invite new users to the group.
+              </li>
+              <li>
+                <strong>Member:</strong> Can decrypt and download group files
+                but cannot encrypt new ones.
+              </li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="box mb-3">
+          <summary class="is-clickable has-text-weight-semibold">
+            Shared Group Encryption Key
+          </summary>
+          <div class="content p-3">
+            <p>
+              Each group utilizes a single, shared encryption key. Files
+              encrypted by Admins using this key can be decrypted by any member
+              of the group, simplifying secure collaboration.
+            </p>
+          </div>
+        </details>
+
+        <details class="box mb-3">
+          <summary class="is-clickable has-text-weight-semibold">
+            Detailed Audit Logs
+          </summary>
+          <div class="content p-3">
+            <p>
+              Maintain comprehensive audit trails for group activities. Track
+              exactly who decrypted which file and when. Logs for file creators
+              include detailed metadata like IP address, timestamp, file
+              details, and other available information for thorough
+              accountability.
+            </p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section class="section pricing-section my-12" id="pricing">
+      <div class="container">
+        <h1 class="title has-text-centered py-6">Choose Your Plan</h1>
+        <h2 class="subtitle has-text-centered has-text-grey">
+          All plans include a <strong>7-day free trial</strong>. No credit card
+          required.
+        </h2>
+
+        <div class="columns is-variable is-8 is-centered mt-6">
+          <!-- Standalone Plan -->
+          <div class="column is-5">
+            <div class="card">
+              <header class="card-header has-bg-primary-custom">
+                <p class="card-header-title has-text-white">Personal</p>
+              </header>
+              <div class="card-content">
+                <div class="content">
+                  <p class="title is-3">$9.99 <span>/month</span></p>
+                  <p class="subtitle is-6">7-Day Free Trial</p>
+                  <ul>
+                    <li>🔐 Personal file encryption & decryption</li>
+                    <li>🧠 AES, RSA, or custom algorithms</li>
+                    <li>⏳ Auto-deletion (1–6h)</li>
+                    <li>🔑 One-time share keys</li>
+                    <li>
+                      👁️ Expiring preview links with brute-force protection
+                    </li>
+                    <li>🛡️ MFA, secure storage, activity logs</li>
+                    <li>📦 Max upload size: 25MB</li>
+                  </ul>
+                </div>
+              </div>
+              <footer class="card-footer">
+                <a
+                  href="#"
+                  class="card-footer-item has-text-primary-custom has-text-weight-bold"
+                  >Start Trial</a
+                >
+              </footer>
+            </div>
+          </div>
+
+          <!-- Group Plan -->
+          <div class="column is-5">
+            <div class="card">
+              <header class="card-header has-bg-primary-custom">
+                <p class="card-header-title has-text-white">Work</p>
+              </header>
+              <div class="card-content">
+                <div class="content">
+                  <p class="title is-3">$29.99 <span>/month</span></p>
+                  <p class="subtitle is-6">7-Day Free Trial</p>
+                  <ul>
+                    <li>👥 Includes all Standalone features</li>
+                    <li>👪 Create & join private groups</li>
+                    <li>🧑‍⚖️ Role-based access (Owner/Admin/Member)</li>
+                    <li>🗝️ Shared group encryption key</li>
+                    <li>📍 Restrict access by IP/device/time</li>
+                    <li>🛡️ MFA for sensitive actions</li>
+                    <li>🕵️ Detailed audit logs</li>
+                  </ul>
+                </div>
+              </div>
+              <footer class="card-footer">
+                <a
+                  href="#"
+                  class="card-footer-item has-text-primary-custom has-text-weight-bold"
+                  >Start Trial</a
+                >
+              </footer>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section contact-container my-12" id="contact">
+      <div class="container">
+        <h2 class="title is-3 has-text-centered has-text-primary-custom py-6">
+          Contact Us
+        </h2>
+
+        <form id="contact-form" class="box">
+          <div class="field">
+            <label class="label has-text-primary-custom">Name</label>
+            <div class="control">
+              <input
+                class="input"
+                type="text"
+                placeholder="Your name"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label has-text-primary-custom">Subject</label>
+            <div class="control">
+              <input class="input" type="text" placeholder="Subject" required />
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label has-text-primary-custom">Email</label>
+            <div class="control">
+              <input
+                class="input"
+                type="email"
+                placeholder="Your email"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label has-text-primary-custom">Message</label>
+            <div class="control">
+              <textarea
+                class="textarea"
+                placeholder="Type your message..."
+                required
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="field is-grouped is-justify-content-center mt-5">
+            <div class="control">
+              <button
+                id="submit-btn"
+                class="button is-primary-custom"
+                type="submit"
+              >
+                <span class="submit-text">Send Message</span>
+                <span class="icon is-small is-hidden loading-icon">
+                  <i class="fas fa-spinner fa-spin"></i>
+                </span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <script>
+      const form = document.getElementById("contact-form");
+      const button = document.getElementById("submit-btn");
+      const loadingIcon = button.querySelector(".loading-icon");
+      const submitText = button.querySelector(".submit-text");
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        // Simulate loading
+        button.classList.add("is-loading");
+        loadingIcon.classList.remove("is-hidden");
+        submitText.textContent = "Sending...";
+
+        setTimeout(() => {
+          button.classList.remove("is-loading");
+          loadingIcon.classList.add("is-hidden");
+          submitText.textContent = "Send Message";
+          alert("Message sent successfully!");
+          form.reset();
+        }, 2000);
+      });
+    </script>
+  
+  {% include "partials/footer.html" %}
+
+{% endblock "body" %}

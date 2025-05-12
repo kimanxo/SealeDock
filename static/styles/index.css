@@ -1,0 +1,222 @@
+.register{
+    background-color: #084B5B;
+}
+
+
+
+
+.login, .navbar-menu, .navbar-burger{
+    color: #084B5B;
+}
+
+.nav-item:hover{
+    background-color: transparent;
+    border-bottom: #084B5B solid 2px;
+    font-weight: 700;
+}
+
+
+
+:root {
+      --primary-color: #084B5B;
+
+    }
+
+    body, .navbar {
+      background-color: #f5f7fa;
+    }
+
+    .pricing-section {
+      padding-top: 4rem;
+      padding-bottom: 4rem;
+    }
+
+    .card {
+      border-radius: 12px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    .card-header-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .card-content ul {
+      margin-top: 1rem;
+      padding-left: 1.2rem;
+    }
+
+    .card-content ul li {
+      margin-bottom: 0.5rem;
+    }
+
+    .title span {
+      font-size: 0.8em;
+      color: #777;
+    }
+
+    .has-bg-primary-custom {
+      background-color: var(--primary-color);
+    }
+
+    .has-text-primary-custom {
+      color: var(--primary-color);
+    }
+
+    .card-footer-item:hover {
+      background-color: rgba(8, 75, 91, 0.1);
+    }
+
+
+    .is-primary {
+      background-color: var(--primary-color) !important;
+      border-color: var(--primary-color) !important;
+    }
+
+    .has-text-primary {
+      color: var(--primary-color) !important;
+    }
+
+    .custom-hero-img {
+      max-width: 220px;
+      width: 100%;
+      height: auto;
+    }
+
+    @media screen and (min-width: 768px) {
+      .custom-hero-img {
+        max-width: 300px;
+      }
+    }
+
+    .custom-buttons .button {
+      font-size: 1.1rem;
+      padding: 0.75em 1.5em;
+    }
+
+    .hero-spacing p {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+
+summary {
+  position: relative;
+  /* Needed for positioning the pseudo-element */
+  cursor: pointer;
+  /* Make it clear it's clickable */
+  padding: 0.75em 2.5em 0.75em 1.25em;
+  /* Increased right padding for icon */
+  margin: -0.75em -1.25em;
+  /* Counteract box padding to fill */
+  border-radius: 6px 6px 0 0;
+  /* Match box top radius */
+  display: block;
+  /* Ensure it takes block layout */
+  list-style: none;
+  /* Remove default marker */
+}
+
+/* Remove default marker specifically for WebKit browsers */
+summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Style the custom indicator using ::after */
+summary::after {
+  content: '+';
+  /* Plus sign for closed state */
+  position: absolute;
+  right: 1.25em;
+  /* Position icon in the right padding area */
+  top: 50%;
+  /* Center vertically */
+  transform: translateY(-50%);
+  /* Fine-tune vertical centering */
+  font-size: 1.3em;
+  /* Adjust icon size */
+  font-weight: normal;
+  /* Adjust weight as needed */
+  line-height: 1;
+  /* Prevent extra vertical space */
+  transition: transform 0.2s ease-in-out;
+  /* Animation for potential rotation */
+  color: #7a7a7a;
+  /* Icon color */
+}
+
+/* --- UPDATED DETAILS[OPEN] STYLES --- */
+details[open]>summary {
+  /* Use direct child selector '>' */
+  border-bottom: 1px solid #dbdbdb;
+  /* Separator when open */
+  margin-bottom: 0.75em;
+  /* Space before content */
+  border-radius: 6px 6px 0 0;
+}
+
+/* Change indicator when details element is open */
+details[open]>summary::after {
+  /* Use direct child selector '>' */
+  content: '−';
+  /* Minus sign (U+2212) for open state */
+  /* Alternatively, rotate the plus: */
+  /* content: '+'; */
+  /* transform: translateY(-50%) rotate(45deg); */
+}
+
+/* --- CENTER ON DESKTOP RULE --- */
+/* On desktop screens (1024px and wider) */
+@media screen and (min-width: 1024px) {
+
+  /* Target the details boxes directly within the container */
+  .section>.container>details.box {
+    width: 75%;
+    /* Set width to 75% */
+    margin-left: auto;
+    /* Center horizontally */
+    margin-right: auto;
+    /* Center horizontally */
+    /* Keep existing bottom margin from mb-3 */
+  }
+}
+
+
+
+
+.button.is-primary-custom {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+}
+
+.button.is-primary-custom:hover {
+  background-color: #063b48;
+}
+
+.contact-container {
+  width: 100%;
+  padding: 0 1rem;
+  margin: auto;
+}
+
+@media (min-width: 768px) {
+  .contact-container {
+    max-width: 600px;
+  }
+}
+
+
+.sticky-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}

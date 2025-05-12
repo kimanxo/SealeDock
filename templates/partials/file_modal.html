@@ -1,0 +1,38 @@
+<!-- File Details Modal -->
+    <div id="fileDetailsModal" class="hidden fixed inset-0 bg-transparent shadow flex items-center justify-center z-50 w-full ">
+        <div class="bg-white rounded-lg shadow-lg ">
+            <div class="bg-[#084B5B] rounded-tl-md rounded-tr-md  flex justify-between items-center border-b px-6 py-4">
+                <h3 class="text-lg font-semibold text-white ">File Details</h3>
+                <button class="text-white cursor-pointer" onclick="closeModal()">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="px-6 py-4">
+                <p><strong>Name:</strong> <span id="modalFileName"></span></p>
+                <p><strong>Type:</strong> <span id="modalFileType"></span></p>
+                <p><strong>Size:</strong> <span id="modalFileSize"></span></p>
+                <p><strong>Groups:</strong> <span id="modalGroups"></span></p>
+                <p><strong>Upload Date:</strong> <span id="modalUploadDate"></span></p>
+            </div>
+            <div class="flex justify-end border-t px-6 py-4">
+                <button class="bg-[#084B5B] text-white px-4 py-2 rounded  cursor-pointer" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal(fileName, fileType, fileSize, uploadDate, groups) {
+            document.getElementById('modalFileName').textContent = fileName;
+            document.getElementById('modalFileType').textContent = fileType;
+            document.getElementById('modalFileSize').textContent = fileSize;
+            document.getElementById('modalUploadDate').textContent = uploadDate;
+            document.getElementById('modalGroups').textContent = groups;
+            document.getElementById('fileDetailsModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('fileDetailsModal').classList.add('hidden');
+        }
+    </script>
