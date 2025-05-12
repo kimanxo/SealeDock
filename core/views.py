@@ -17,7 +17,28 @@ from django.utils import timezone
 from django.contrib import messages
 from django.core.validators import validate_email
 from django.contrib.auth import update_session_auth_hash
-
+from .utils import Encryptor
+from django.conf import settings
+import os, uuid, mimetypes, ipaddress
+from django.core.files.base import ContentFile
+import os, uuid, mimetypes, ipaddress
+from django.db.models import Q
+from django.shortcuts import render
+from django.core.files.storage import default_storage
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse, Http404
+from django.conf import settings
+from cryptography.fernet import InvalidToken
+from django.utils import timezone
+from datetime import timezone
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.password_validation import validate_password
+from cryptography.hazmat.primitives import serialization
 
 
 
@@ -176,19 +197,7 @@ class SettingsView(LoginRequiredMixin, View):
         return render(request, "settings.html", {"user": request.user})
 
 
-@login_required
-def upload_media(request):
-    if request.method == "POST":
-        form = MediaUploadForm(request.POST, request.FILES, user=request.user)
-        if form.is_valid():
-            media = form.save(commit=False)
-            media.owner = request.user
-            media.save()
-            form.save_m2m()  # For groups many-to-many
-            return redirect("media_list")  # Create this page or redirect elsewhere
-    else:
-        form = MediaUploadForm(user=request.user)
-    return render(request, "partials/upload.html", {"form": form})
+
 
 
 class MediaListView(LoginRequiredMixin, ListView):
@@ -368,3 +377,71 @@ def change_password(request):
             return redirect("settings")  # or wherever you want
 
     return render(request, "partials/change_password.html", {"errors": errors})
+
+
+
+
+
+@login_required
+def upload_media(request):
+    """
+    Handle media file upload with encryption.
+
+    Process:
+    1. Validate form
+    2. Generate encryption keys
+    3. Encrypt file
+    4. Save encrypted file and metadata
+
+    Returns:
+        HttpResponse: Redirects to files list or shows upload form
+    """
+    if request.method == "POST":
+        form = MediaUploadForm(request.POST, request.FILES, user=request.user)
+        if form.is_valid():
+            file = request.FILES.get("file")
+
+            # Initialize encryptor with master key
+            encryptor = Encryptor(master_key=settings.ENCRYPTION_MASTER_KEY)
+
+            # Generate and store both raw and encrypted keys
+            raw_key, encrypted_key = encryptor.generate_secure_key()
+
+            # Process the file
+            temp_input_path = f"/tmp/{uuid.uuid4()}_{file.name}"
+            with open(temp_input_path, "wb") as temp_file:
+                for chunk in file.chunks():
+                    temp_file.write(chunk)
+
+            temp_output_path = temp_input_path + ".sealed"
+
+            # Encrypt using the raw_key stored in the encryptor
+            encryptor.encrypt_file(temp_input_path, temp_output_path)
+
+            with open(temp_output_path, "rb") as enc_file:
+                encrypted_data = enc_file.read()
+
+            media = form.save(commit=False)
+
+            # Store the encrypted key in the database
+            media.key = encrypted_key
+            media.owner = request.user
+            
+
+            media.file.save(
+                f"{file.name}.sealed", ContentFile(encrypted_data), save=False
+            )
+          
+            media.save()
+            form.save_m2m()
+
+            # Clean up temporary files
+            os.remove(temp_input_path)
+            os.remove(temp_output_path)
+
+            response = HttpResponse()
+            response["HX-Redirect"] = "/dashboard/files"
+            return response
+    else:
+        form = MediaUploadForm(user=request.user)
+    return render(request, "partials/upload.html", {"form": form})

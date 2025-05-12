@@ -16,6 +16,7 @@ class Media(models.Model):
     expires_at = models.DateTimeField(
         default= timezone.now() + timedelta(hours=6)
     )
+    key = models.CharField(max_length=255, null=False, blank=False)
     groups = models.ManyToManyField("Group", related_name="media", blank=True)  
     def __str__(self):
         return self.name
@@ -24,7 +25,7 @@ class Media(models.Model):
         if self.file and not self.metadata:
             self.metadata = {
                 "size": format_size(self.file.size),
-                "type": self.file.file.content_type,
+                # "type": self.file.content_type,
                 "name": self.file.name,
             }
         if not self.name:
@@ -43,15 +44,7 @@ class Media(models.Model):
         return self.groups.filter(members__id__in=member_ids).exists()
 
 
-class Key(models.Model):
-    media = models.OneToOneField(Media, on_delete=models.CASCADE)
-    encryption = models.TextField()
-    decryption = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
-
-# # ========== User & Groups ==========
 
 
 class Member(models.Model):
