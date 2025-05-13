@@ -473,6 +473,8 @@ def download_media(request, pk):
         and not media.groups.filter(members=request.user).exists()
     ):
         return HttpResponse("You don't have permission to access this file")
+    
+    
 
     encrypted_file_path = media.file.path
     if not os.path.exists(encrypted_file_path):
@@ -506,12 +508,12 @@ def download_media(request, pk):
         
 
     except InvalidToken as e:
-        print(f"Decryption failed for media {pk}: {str(e)}")
-        return HttpResponse("Failed to decrypt file - invalid key")
+
+        return render(request, "error.html",{"error":"Failed to decrypt the file - invalid key."}, status=403)
 
     except Exception as e:
-        print(f"Error processing media {pk}: {str(e)}")
-        return HttpResponse("An error occurred while processing the file")
+
+        return render(request, "error.html",{"error":"An error happened during file processing, please contact the support."}, status=403)
 
     finally:
         # Clean up temporary file
@@ -543,7 +545,7 @@ def generate_preview_link(request, pk):
     )
     OneTimeKey.objects.create(media=media, key=key)
 
-    share_url = f"{request.build_absolute_uri('/')[:-1]}/media/preview_file/{token}?key={key}"
+    share_url = f"{request.build_absolute_uri('/')[:-1]}/media/preview/{token}?key={key}"
     return JsonResponse({"share_url": share_url})
 
 
@@ -552,22 +554,38 @@ def generate_preview_link(request, pk):
 def preview_file(request, token):
     key_param = request.GET.get("key")
     preview = get_object_or_404(PreviewLink, token=token)
-    
-    
-    
-    if not preview.is_valid():
-        return HttpResponse("Link expired or disabled", status=403)
 
-    # Validate one-time key
+    if not preview.is_valid():
+        return render(request, "error.html",{"error":"The link is either expired or used, please request a new one from the issuer."}, status=403)
+
+    # Check key validity (but don’t mark as used yet)
+    if not OneTimeKey.objects.filter(media=preview.media, key=key_param, used=False).exists():
+        return render(request,"error.html",{"error":"The key is either invlaid or used, please request a new link from the issuer."}, status=403)
+
+
+    media = preview.media
+    metadata = media.metadata or {}
+
+    return render(request, "file_preview.html", {
+        "media": media,
+        "metadata": metadata,
+        "token": token,
+        "key": key_param,
+    })
+
+
+def download_file(request, token):
+    key_param = request.GET.get("key")
+    preview = get_object_or_404(PreviewLink, token=token)
+
+    if not preview.is_valid():
+        return render(request, "error.html",{"error":"The link is either expired or used, please request a new one from the issuer."}, status=403)
+
     try:
         one_time_key = OneTimeKey.objects.get(media=preview.media, key=key_param, used=False)
     except OneTimeKey.DoesNotExist:
-        return HttpResponse("Invalid or already used key", status=403)
+        return render(request,"error.html",{"error":"The key is either invlaid or used, please request a new link from the issuer."}, status=403)
 
-    # Mark key as used
-    
-
-    # Decrypt and return file
     media = preview.media
     encrypted_file_path = media.file.path
     original_filename = os.path.basename(media.file.name).replace(".sealed", "")
@@ -580,12 +598,13 @@ def preview_file(request, token):
         content_type = mimetypes.guess_type(original_filename)[0] or "application/octet-stream"
         response = HttpResponse(decrypted_data, content_type=content_type)
         response["Content-Disposition"] = f'attachment; filename="{original_filename}"'
+
         one_time_key.used = True
         one_time_key.save()
+
         return response
     except Exception as e:
-        print(e)
-        return HttpResponse("Decryption failed", status=500)
+        return render(request, "error.html",{"error":"The decryption failed due to internal server error, please contact the support."}, status=500)
     finally:
         if os.path.exists(decrypted_temp_path):
             os.remove(decrypted_temp_path)

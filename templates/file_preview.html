@@ -1,0 +1,25 @@
+{% extends 'base.html' %} 
+{% load static %}
+ {% block "body" %}
+
+
+    <main class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg  max-w-md w-full " style="background-color: transparent !important;">
+        <img src="{% static 'img/Logo.png' %}" alt="Logo" class="w-80 h-64 mx-auto  my-8">
+        <div class="bg-[#084B5B] rounded-tl-md rounded-tr-md  shadow-lg  border-b px-6 py-4">
+            <h3 class="text-lg font-semibold text-white ">File Details</h3>
+            
+        </div>
+        <div class="px-6 py-4 bg-white shadow-x-lg">
+            <p><strong>Name:</strong> {{ metadata.name }}</p>
+            <p><strong>Size:</strong> {{ metadata.size }}</>
+        </div>
+        <form method="get" action="{% url 'download_file' token %}" class="shadow-lg rounded-b-md flex  bg-white justify-center border-t px-6 py-4">
+            <input type="hidden" name="key" value="{{ key }}">
+            <button class="px-4 py-2 rounded   cursor-pointer text-[#084B5B]" type="submit" style="color: #084B5B !important;">Download</button>
+        </form>
+    </main>
+
+
+
+
+ {% endblock "body" %}
