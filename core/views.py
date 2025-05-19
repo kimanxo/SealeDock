@@ -10,12 +10,12 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import MediaUploadForm
-from .models import Media, Group, Member, PreviewLink, OneTimeKey, GroupInvite
+from .models import Media, Group, Member, PreviewLink, OneTimeKey, GroupInvite, ActivityLog
 from django.views.generic import ListView
 from django.utils import timezone
 from django.core.validators import validate_email
 from django.contrib.auth import update_session_auth_hash
-from .utils import Encryptor
+from .utils import Encryptor, get_client_ip
 from django.conf import settings
 import os, uuid, mimetypes, ipaddress
 from django.core.files.base import ContentFile
@@ -25,6 +25,8 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponse, Http404, JsonResponse
 import secrets
 from datetime import timedelta
+from django.core.paginator import Paginator
+
 
 
 
@@ -174,9 +176,28 @@ class LoginView(View):
         return redirect("/")
 
 
-class DashboardView(LoginRequiredMixin, View):
-    def get(self, request):
-        return render(request, "dashboard.html", {"user": request.user})
+
+@login_required
+def owner_dashboard(request):
+    # Owned groups and media
+    owned_groups = Group.objects.filter(members__user=request.user, members__role="owner").distinct()
+    owned_media = Media.objects.filter(owner=request.user)
+
+    # Fetch logs related to media or groups the user owns
+    logs = ActivityLog.objects.filter(
+        Q(media__in=owned_media) | Q(group__in=owned_groups)
+    ).select_related("actor", "media", "group").order_by("-timestamp")
+
+    # Pagination
+    paginator = Paginator(logs, 10)  # 10 logs per page
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, "dashboard.html", {
+        "owned_groups": owned_groups,
+        "owned_media": owned_media,
+        "logs": page_obj,
+    })
 
 
 class SettingsView(LoginRequiredMixin, View):
@@ -523,6 +544,16 @@ def download_media(request, pk):
         response = HttpResponse(decrypted_data, content_type=content_type)
         response["Content-Disposition"] = f'attachment; filename="{original_filename}"'
 
+        ActivityLog.objects.create(
+        actor=request.user if request.user else None,
+        owner=media.owner,
+        event_type="media_download",
+        ip_address=get_client_ip(request),
+        media=media,
+        group=media.groups.first() if media.groups.exists() else None,
+        additional_data={"file": media.name},
+        )
+        
         # Log admin activity if applicable
         return response
         
@@ -585,6 +616,15 @@ def preview_file(request, token):
 
     media = preview.media
     metadata = media.metadata or {}
+    ActivityLog.objects.create(
+        actor=request.user if request.user else None,
+        owner=media.owner,
+        event_type="media_preview",
+        ip_address=get_client_ip(request),
+        media=media,
+        group=media.groups.first() if media.groups.exists() else None,
+        additional_data={"file": media.name,"metadata": metadata, "token":token},
+        )
 
     return render(request, "file_preview.html", {
         "media": media,
@@ -621,7 +661,15 @@ def download_file(request, token):
 
         one_time_key.used = True
         one_time_key.save()
-
+        ActivityLog.objects.create(
+        actor=request.user if request.user else None,
+        owner=media.owner,
+        event_type="media_download",
+        ip_address=get_client_ip(request),
+        media=media,
+        group=media.groups.first() if media.groups.exists() else None,
+        additional_data={"file": media.name},
+        )
         return response
     except Exception as e:
         return render(request, "error.html",{"error":"The decryption failed due to internal server error, please contact the support."}, status=500)
@@ -695,8 +743,8 @@ def join_group(request, token):
             "error": "The invitation link is either expired or used, please request a new one from the issuer."
         }, status=403)
 
+    group = invitation.group
     if request.method == "POST":
-        group = invitation.group
 
         # Check if the user is already a member
         already_member = group.members.filter(user=request.user).exists()
@@ -704,12 +752,27 @@ def join_group(request, token):
             # Create member with role 'member'
             member = Member.objects.create(user=request.user, role='member')
             group.members.add(member)
+            ActivityLog.objects.create(
+            actor=request.user,
+            owner=group.members.filter(role="owner").first().user,
+            event_type="member_joined_group",
+            ip_address=get_client_ip(request),
+            group=group,
+            invite=invitation,
+            )
 
-        # Optionally mark the invitation as used (if it's single-use)
-        # invitation.used = True
+        
         invitation.save()
 
         return redirect("group_list")  # Replace with your actual group list view name
+    ActivityLog.objects.create(
+            actor=request.user,
+            owner=group.members.filter(role="owner").first().user,
+            event_type="group_invite_preview",
+            ip_address=get_client_ip(request),
+            group=group,
+            invite=invitation,
+            )
 
     return render(request, "invitation_preview.html", {
         "token": token,

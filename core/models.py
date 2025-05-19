@@ -109,34 +109,37 @@ class OneTimeKey(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-# # ========== Global Security Settings ==========
 
 
-# class SecuritySettings(models.Model):
-#     brute_force_protection_enabled = models.BooleanField(default=True)
-#     created_at = models.DateTimeField(auto_now_add=True)
+class ActivityLog(models.Model):
+    EVENT_TYPES = [
+        ("media_download", "Media Download"),
+        ("media_preview", "Media View"),
+        ("group_invite_preview", "Group Invite Used"),
+        ("member_joined_group", "Member Joined Group"),
+    ]
 
-#     class Meta:
-#         verbose_name_plural = "Security Settings"
+    # Who performed the action (e.g., downloaded the file)
+    actor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="activity_logs")
 
+    # Who owns the resource being acted upon (e.g., owner of the file)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="owned_activity_logs")
 
-# # ========== Logging / Auditing ==========
+    event_type = models.CharField(max_length=50, choices=EVENT_TYPES)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
 
+    # Context
+    media = models.ForeignKey("Media", on_delete=models.SET_NULL, null=True, blank=True)
+    group = models.ForeignKey("Group", on_delete=models.SET_NULL, null=True, blank=True)
+    invite = models.ForeignKey("GroupInvite", on_delete=models.SET_NULL, null=True, blank=True)
 
-# class ActivityLog(models.Model):
-#     EVENT_TYPES = [
-#         ("login", "Login"),
-#         ("media_download", "Media Download"),
-#         ("preview_link_access", "Preview Link Access"),
-#         ("group_invite_used", "Group Invite Used"),
-#     ]
+    additional_data = models.JSONField(null=True, blank=True)
 
-#     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-#     event_type = models.CharField(max_length=50, choices=EVENT_TYPES)
-#     ip_address = models.GenericIPAddressField(null=True, blank=True)
-#     media = models.ForeignKey(Media, on_delete=models.SET_NULL, null=True, blank=True)
-#     link_token = models.CharField(max_length=255, null=True, blank=True)
-#     timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.event_type} by {self.actor or 'Unknown'} on {self.owner.username}'s data"
+
 
 
 # # ========== Cleanup Script ==========

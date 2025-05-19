@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import index, RegisterView, LoginView, DashboardView, Logout, SettingsView, upload_media, download_media, GroupDetailView,MediaListView, MediaView, GroupListView, GroupView, update_username, update_email, change_password, generate_preview_link, preview_file, download_file, create_group, generate_link, join_group
+from .views import index, RegisterView, LoginView, owner_dashboard, Logout, SettingsView, upload_media, download_media, GroupDetailView,MediaListView, MediaView, GroupListView, GroupView, update_username, update_email, change_password, generate_preview_link, preview_file, download_file, create_group, generate_link, join_group
 from django.contrib.auth import views as auth_views
 
 
@@ -34,7 +34,7 @@ urlpatterns = [
         name="password_reset_complete",
     ),
     path("logout", view=Logout, name="logout"),
-    path("dashboard", view=DashboardView.as_view(), name="dashboard"),
+    path("dashboard", view=owner_dashboard, name="dashboard"),
     path("dashboard/upload", upload_media, name="upload_media"),
     path("dashboard/create_group", create_group, name="create_group"),
     
