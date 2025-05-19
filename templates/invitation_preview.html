@@ -1,0 +1,25 @@
+{% extends 'base.html' %} 
+{% load static %}
+ {% block "body" %}
+
+
+    <main class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg  max-w-md w-full " style="background-color: transparent !important;">
+        <img src="{% static 'img/Logo.png' %}" alt="Logo" class="w-80 h-64 mx-auto  my-8">
+        <div class="bg-[#084B5B] rounded-tl-md rounded-tr-md  shadow-lg  border-b px-6 py-4">
+            <h3 class="text-lg font-semibold text-white ">Invitation Link</h3>
+            
+        </div>
+        <div class="px-6 py-4 bg-white shadow-x-lg">
+            <p><strong>Group:</strong> {{ invitation.group }}</p>
+            <p><strong>Size:</strong>{{ invitation.group.members.all|length }}</p>
+        </div>
+        <form method="post" action="{% url 'join_group' token %}" class="shadow-lg rounded-b-md flex  bg-white justify-center border-t px-6 py-4">
+            {% csrf_token %}
+            <button class="px-4 py-2 rounded   cursor-pointer text-[#084B5B]" type="submit" style="color: #084B5B !important;">Join</button>
+        </form>
+    </main>
+
+
+
+
+ {% endblock "body" %}

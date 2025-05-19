@@ -43,3 +43,17 @@ class MediaUploadForm(forms.ModelForm):
         if not name and file:
             cleaned_data["name"] = file.name
         return cleaned_data
+
+
+
+
+class GroupForm(forms.ModelForm):
+    class Meta:
+        model = Group
+        fields = ['name']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'border border-gray-300 rounded px-2 py-1 w-full',
+                'placeholder': 'Enter group name'
+            }),
+        }

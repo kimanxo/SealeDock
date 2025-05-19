@@ -10,7 +10,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import MediaUploadForm
-from .models import Media, Group, Member, PreviewLink, OneTimeKey
+from .models import Media, Group, Member, PreviewLink, OneTimeKey, GroupInvite
 from django.views.generic import ListView
 from django.utils import timezone
 from django.core.validators import validate_email
@@ -250,17 +250,23 @@ class GroupView(LoginRequiredMixin, View):
             response["HX-Retarget"] = "#errors"
             response["HX-Reswap"] = "innerHTML"
             return response
-        if group.owner != request.user:
+        if not group.members.filter(user=request.user, role="owner").exists():
             response = HttpResponse(
                 "You do not have permission to delete this group", status=403
             )
             response["HX-Retarget"] = "#errors"
             response["HX-Reswap"] = "innerHTML"
             return response
+        for member in list(group.members.all()):
+            member.delete()
+        for media in list(group.media.all()):
+            if media.file and os.path.isfile(media.file.path):
+                os.remove(media.file.path)
+            media.delete()
         group.delete()
         response = render(
             request,
-            "partials/files_rows.html",
+            "partials/groups_rows.html",
             {"group_list": Group.objects.filter(members__user=self.request.user)},
         )
         response["HX-Retarget"] = ".tbody"
@@ -268,6 +274,17 @@ class GroupView(LoginRequiredMixin, View):
         return response
 
 
+
+class GroupDetailView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        group = get_object_or_404(
+            Group.objects.filter(members__user=request.user).distinct(), pk=pk
+        )
+        return render(
+            request,
+            "group_files.html",
+            {"group": group},
+        )
 
 
 
@@ -467,13 +484,16 @@ def download_media(request, pk):
     """
     media = get_object_or_404(Media, pk=pk)
 
-    # Permission check
+   # Get Member objects for the user
+    member_ids = Member.objects.filter(user=request.user).values_list("id", flat=True)
+
+    # Check permission
     if (
         request.user != media.owner
-        and not media.groups.filter(members=request.user).exists()
+        and not media.groups.filter(members__id__in=member_ids).exists()
     ):
         return HttpResponse("You don't have permission to access this file")
-    
+
     
 
     encrypted_file_path = media.file.path
@@ -608,3 +628,90 @@ def download_file(request, token):
     finally:
         if os.path.exists(decrypted_temp_path):
             os.remove(decrypted_temp_path)
+            
+            
+
+
+
+
+
+
+
+
+from .forms import GroupForm
+from .models import Member, Group
+
+@login_required
+def create_group(request):
+    if request.method == "POST":
+        form = GroupForm(request.POST)
+        if form.is_valid():
+            group = form.save()
+
+            # Create a Member for the user with role 'owner'
+            member = Member.objects.create(user=request.user, role='owner')
+            group.members.add(member)
+
+            response = HttpResponse()
+            response["HX-Redirect"] = "/dashboard/groups"
+            return response # or wherever you want
+    else:
+        form = GroupForm()
+    return render(request, 'partials/create_group.html', {'form': form})
+
+
+
+
+
+@login_required
+def generate_link(request, pk):
+    group = get_object_or_404(Group, pk=pk)
+
+    # Generate unique token + key
+    token = secrets.token_urlsafe(24)
+    # Create the PreviewLink and OneTimeKey
+    group_invite_link = GroupInvite.objects.create(
+        group=group,
+        token=token,
+        expires_at=timezone.now() + timedelta(hours=6)
+    )
+
+    invitation_link = f"{request.build_absolute_uri('/')[:-1]}/group/join/{token}"
+    return JsonResponse({"invitation_link": invitation_link})
+
+
+
+
+
+
+
+@login_required
+def join_group(request, token):
+    invitation = get_object_or_404(GroupInvite, token=token)
+
+    # Check if the invitation is valid
+    if not invitation.is_valid():
+        return render(request, "error.html", {
+            "error": "The invitation link is either expired or used, please request a new one from the issuer."
+        }, status=403)
+
+    if request.method == "POST":
+        group = invitation.group
+
+        # Check if the user is already a member
+        already_member = group.members.filter(user=request.user).exists()
+        if not already_member:
+            # Create member with role 'member'
+            member = Member.objects.create(user=request.user, role='member')
+            group.members.add(member)
+
+        # Optionally mark the invitation as used (if it's single-use)
+        # invitation.used = True
+        invitation.save()
+
+        return redirect("group_list")  # Replace with your actual group list view name
+
+    return render(request, "invitation_preview.html", {
+        "token": token,
+        "invitation": invitation
+    })

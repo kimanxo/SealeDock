@@ -8,27 +8,27 @@
 <div class="p-6">
   <div class="flex w-full justify-between items-center my-4">
 
-    <h2 class="text-2xl font-semibold mb-4">Your Groups</h2>
-    <button class="border-[#084B5B] border-2 text-[#084B5B] font-semibold px-4 py-2 rounded  cursor-pointer"  hx-get="{% url 'create_group' %}" hx-swap="outer-HTML" hx-target="#upload_overlay" >Create+</button>
+    <h2 class="text-2xl font-semibold mb-4"> {{group.name}}' Files</h2>
+    {% comment %} <button class="border-[#084B5B] border-2 text-[#084B5B] font-semibold px-4 py-2 rounded  cursor-pointer"  hx-get="{% url 'upload_media' %}" hx-swap="outer-HTML" hx-target="#upload_overlay" >upload+</button> {% endcomment %}
   </div>
 
     <div class="overflow-x-auto rounded-tl-md rounded-tr-md ">
       <table class="min-w-full bg-white rounded-xl shadow">
         <thead class="">
           <tr class="  bg-[#084B5B] text-left text-sm font-semibold text-white">
-            <th class="px-6 py-4">Group</th>
+            <th class="px-6 py-4">File Name</th>
             <th class="px-6 py-4 text-end">Actions</th>
           </tr>
         </thead>
-         {% include "partials/groups_rows.html"%}
+         {% include "partials/group_files_rows.html"%}
       </table>
     </div>
 
-    {% include 'partials/groups_modal.html' %}
+    {% include 'partials/file_modal.html' %}
 
 </div>
 
-<div id="upload_overlay"></div>
+{% comment %} <div id="upload_overlay"></div> {% endcomment %}
 
 
 
