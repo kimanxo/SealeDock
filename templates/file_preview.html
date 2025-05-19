@@ -11,7 +11,7 @@
         </div>
         <div class="px-6 py-4 bg-white shadow-x-lg">
             <p><strong>Name:</strong> {{ metadata.name }}</p>
-            <p><strong>Size:</strong> {{ metadata.size }}</>
+            <p><strong>Size:</strong> {{ metadata.size }}</p>
         </div>
         <form method="get" action="{% url 'download_file' token %}" class="shadow-lg rounded-b-md flex  bg-white justify-center border-t px-6 py-4">
             <input type="hidden" name="key" value="{{ key }}">
