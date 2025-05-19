@@ -135,3 +135,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 ENCRYPTION_MASTER_KEY = "sH7Q8v2qJW4eY5Xz9pLbNcRfUtGmKjWnZr4t6y9u0i1oP3x5V"  # Replace with your generated key
+LOGIN_URL = "/login"
