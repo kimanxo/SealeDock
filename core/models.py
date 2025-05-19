@@ -76,7 +76,6 @@ class Group(models.Model):
 class GroupInvite(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     token = models.CharField(max_length=255, unique=True)
-    enabled = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(
         default= timezone.now() + timedelta(days=2)
@@ -92,7 +91,6 @@ class GroupInvite(models.Model):
 class PreviewLink(models.Model):
     media = models.ForeignKey(Media, on_delete=models.CASCADE)
     token = models.CharField(max_length=255, unique=True)
-    enabled = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(
         default= timezone.now() + timedelta(hours=6)
@@ -142,12 +140,3 @@ class ActivityLog(models.Model):
 
 
 
-# # ========== Cleanup Script ==========
-
-# from .models import Media, PreviewLink, GroupInvite
-
-
-# def cleanup_expired_objects():
-#     Media.objects.filter(expires_at__lt=timezone.now()).delete()
-#     PreviewLink.objects.filter(expires_at__lt=timezone.now()).delete()
-#     GroupInvite.objects.filter(expires_at__lt=timezone.now()).delete()
