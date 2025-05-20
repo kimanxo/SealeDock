@@ -272,12 +272,13 @@ def preview_file(request, token):
             {"error": "The key is either invalid or used, please request a new link from the issuer."},
             status=403,
         )
+    
 
     media = preview.media
     metadata = media.metadata or {}
 
     ActivityLog.objects.create(
-        actor=request.user if request.user else None,
+        actor=request.user if request.user.is_authenticated else None,
         owner=media.owner,
         event_type="media_preview",
         ip_address=get_client_ip(request),
@@ -345,7 +346,7 @@ def download_file(request, token):
         one_time_key.save()
 
         ActivityLog.objects.create(
-            actor=request.user if request.user else None,
+            actor=request.user if request.user.is_authenticated else None,
             owner=media.owner,
             event_type="media_download",
             ip_address=get_client_ip(request),
